@@ -1,9 +1,16 @@
 import React, { useState,useEffect } from 'react';
+import { useDispatch } from 'react-redux'; // Importar para usar Redux
+import { addItem } from './CartSlice'; // Acción de Redux
 import './ProductList.css'
+
 import CartItem from './CartItem';
 function ProductList() {
     const [showCart, setShowCart] = useState(false); 
     const [showPlants, setShowPlants] = useState(false); // State to control the visibility of the About Us page
+   
+    const dispatch = useDispatch();
+    const [addedToCart, setAddedToCart] = useState({}); // Estado local para rastrear el carrito
+  
 
     const plantsArray = [
         {
@@ -242,10 +249,19 @@ const handlePlantsClick = (e) => {
     setShowCart(false); // Hide the cart when navigating to About Us
 };
 
+//
+const handleAddToCart = (plant) => {
+    dispatch(addItem({ name: plant.name, cost: plant.cost, quantity: 1, image: plant.image })); // Enviar acción a Redux
+    setAddedToCart({ ...addedToCart, [plant.name]: true }); // Actualizar estado local
+  };
+//
+
    const handleContinueShopping = (e) => {
     e.preventDefault();
     setShowCart(false);
   };
+
+
     return (
         <div>
              <div className="navbar" style={styleObj}>
@@ -268,7 +284,28 @@ const handlePlantsClick = (e) => {
         </div>
         {!showCart? (
         <div className="product-grid">
-
+             {plantsArray.map((category) => (
+                <div key={category.category}>
+                    <h2>{category.category}</h2>
+                    <div className="product-list">
+                        {category.plants.map((plant) => (
+                        <div className="product-card" key={plant.name}>
+                            <img src={plant.image} alt={plant.name} className="product-image" />
+                            <h3 className="product-title">{plant.name}</h3>
+                            <p className="product-price">${plant.cost}</p>
+                            <p>{plant.description}</p>
+                            <button
+                            className={`product-button ${addedToCart[plant.name] ? "added-to-cart" : ""}`}
+                            onClick={() => handleAddToCart(plant)}
+                            disabled={addedToCart[plant.name]} // Deshabilitar si ya se agregó
+                            >
+                            {addedToCart[plant.name] ? "Added" : "Add to Cart"}
+                            </button>
+                        </div>
+                        ))}
+                    </div>
+                </div>
+            ))}
 
         </div>
  ) :  (
